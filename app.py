@@ -2,6 +2,9 @@ from flask import Flask, request, render_template, jsonify
 import yfinance as yf
 import plotly.graph_objects as go
 import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
 import time
 import datetime
 
@@ -15,6 +18,44 @@ def date_to_unix(date_string):
     unix_timestamp = int(time.mktime(date_object.timetuple()))
     
     return unix_timestamp
+
+# Function to prepare data for modeling
+def prepare_data(df):
+    # Convert 'Close' to numeric, coercing errors (in case there are any non-numeric values)
+    df['Close'] = pd.to_numeric(df['Close'], errors='coerce')
+
+    df['Price Change'] = df['Close'].diff()
+    df['Price Change %'] = (df['Price Change'] / df['Close'].shift(1)) * 100
+    df['Target'] = df['Price Change %'].shift(-1)  # Predict the next day's change
+
+    # Drop rows with NaN values
+    df = df.dropna()
+
+    return df[['Close', 'Price Change %', 'Target']]
+
+# Function to predict stock performance
+def predict_stock_performance(stock_data):
+    X = stock_data[['Close', 'Price Change %']]
+    y = stock_data['Target']
+
+    # Split the data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Train a linear regression model
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+
+    # Predict on the test set
+    predictions = model.predict(X_test)
+
+    # Return predictions
+    return predictions, y_test
+
+# Function to decide which stock to buy
+def decide_which_to_buy(predictions, actuals):
+    results = pd.DataFrame({'Predicted': predictions, 'Actual': actuals})
+    results['Recommendation'] = np.where(results['Predicted'] > 0, 'Buy', 'Hold')
+    return results
 
 @app.route('/')
 def index():
@@ -53,7 +94,19 @@ def stock_analysis():
     # Pass stock data as a table
     stock_data_table = stock_data.reset_index().to_dict('records')
 
-    return jsonify({'chart_html': chart_html, 'stock_data_table': stock_data_table})
+    # Prepare the data
+    prepared_data = prepare_data(stock_data)
+
+    # Predict stock performance
+    predictions, actuals = predict_stock_performance(prepared_data)
+
+    # Decide which stocks to buy
+    result = decide_which_to_buy(predictions, actuals)
+
+    # Get the last prediction for today's decision
+    recommendation = result.iloc[-1]['Recommendation']
+
+    return jsonify({'chart_html': chart_html, 'stock_data_table': stock_data_table, 'stock_info': stock.info, 'prediction': recommendation})
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -31,6 +31,9 @@
 		<!-- Error message -->
 		<div id="error"></div>
 
+		<!-- Stock Info -->
+		<div id="stockInfo"></div>
+
 		<!-- The chart will be embedded here -->
 		<div id="chart"></div>
 	  
@@ -76,7 +79,30 @@
 						$('#chart').html('');  // Clear the chart
 						$('#stockData tbody').empty();  // Clear the stock data table
 					} else {
+						console.log(response)
 						$('#error').text('');  // Clear any previous error message
+						$('#stockInfo').text(''); 
+						if(response.stock_info) {
+							let stockInfo = response.stock_info;
+							let currentPrice = parseFloat(stockInfo.currentPrice); 
+
+							let recommendationColor = response.prediction == 'Buy' ? "text-bg-success" : "text-bg-danger"; 
+							
+							let $infoElem = `
+								<!-- <button class="btn btn-danger">${response.prediction}</button>-->
+								<h3>${stockInfo.longName} (${stockInfo.symbol})</h3>
+								<hr>
+								<div class="d-flex justify-content-between -align-items-middle">
+								<h1>${getCurrencySymbol(stockInfo.currency)}${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h1>
+								<h1><span class="badge text-dark-  ${recommendationColor}">${response.prediction}</span></h1>
+								</div>
+								
+							`; 
+
+							$('#stockInfo').html($infoElem); 
+						}
+
+						
 						$('#chart').html(response.chart_html);  // Add the chart HTML
 						$('#stockData tbody').empty();  // Clear previous data
 			
@@ -135,6 +161,16 @@
 					$('#error').html($errorElem);
 				}
 			});
+
+			function getCurrencySymbol(currencyCode) {
+				return (0).toLocaleString('en', {
+					style: 'currency',
+					currency: currencyCode,
+					minimumFractionDigits: 0,
+					maximumFractionDigits: 0
+				}).replace(/\d/g, '').trim();
+			}
+
 		});
 	</script>
 </body>

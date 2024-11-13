@@ -68,12 +68,14 @@ def stock_analysis():
     stock_data_table = None  # Initialize chart_html to None
     
     stock_symbol = request.json.get('symbol')
-    start_date = request.json.get('start_date')
-    end_date = request.json.get('end_date')
+    period = request.json.get('period')
+    # start_date = request.json.get('start_date')
+    # end_date = request.json.get('end_date')
 
     # Get historical data for the stock symbol
     stock = yf.Ticker(stock_symbol)
-    stock_data = stock.history(start=start_date, end=end_date)
+    # stock_data = stock.history(start=start_date, end=end_date)
+    stock_data = stock.history(period=period)
 
     if stock_data.empty:
         return jsonify({'error': "No data found for the given stock symbol and date range."})

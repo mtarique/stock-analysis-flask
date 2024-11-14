@@ -54,7 +54,7 @@ def predict_stock_performance(stock_data):
 # Function to decide which stock to buy
 def decide_which_to_buy(predictions, actuals):
     results = pd.DataFrame({'Predicted': predictions, 'Actual': actuals})
-    results['Recommendation'] = np.where(results['Predicted'] > 0, 'Buy', 'Hold')
+    results['Recommendation'] = np.where(results['Predicted'] > 0, 'BUY', 'HOLD')
     return results
 
 @app.route('/')
@@ -108,7 +108,18 @@ def stock_analysis():
     # Get the last prediction for today's decision
     recommendation = result.iloc[-1]['Recommendation']
 
-    return jsonify({'chart_html': chart_html, 'stock_data_table': stock_data_table, 'stock_info': stock.info, 'prediction': recommendation})
+    # Get the latest close price and previous close price
+    latest_close = stock_data['Close'].iloc[-1]
+   
+    previous_close = stock_data['Close'].iloc[-2]
+    close_datetime = stock_data.index[-1]
+
+    price_change = latest_close - previous_close; 
+
+    # Calculate the price change percentage
+    price_change_pct = ((price_change) / previous_close) * 100
+
+    return jsonify({'chart_html': chart_html, 'stock_data_table': stock_data_table, 'stock_info': stock.info, 'close_datetime': close_datetime, 'price_change': price_change, 'price_change_pct': price_change_pct, 'prediction': recommendation})
 
 if __name__ == '__main__':
     app.run(debug=True)

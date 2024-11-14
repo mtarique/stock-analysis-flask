@@ -122,6 +122,7 @@
 							console.log(response)
 							let resultElem = ``; 
 							let currencySymbol = ''; 
+							let $infoElem = ``; 
 							
 							if(response.stock_info) {
 								let stockInfo = response.stock_info;
@@ -130,21 +131,33 @@
 
 								let recommendationColor = response.prediction == 'Buy' ? "text-bg-success" : "text-bg-danger"; 
 								
-								let $infoElem = `
-									<!-- <button class="btn btn-danger">${response.prediction}</button>-->
-									<h3>${stockInfo.longName} (${stockInfo.symbol})</h3>
-									<hr>
-									<div class="d-flex justify-content-between -align-items-middle">
-									<h1>${currencySymbol}${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h1>
-									<h1><span class="badge text-dark-  ${recommendationColor}">${response.prediction}</span></h1>
+								$infoElem = `
+									<div class="card-header d-flex justify-content-between align-items-center bg-white"> 
+										<div>
+											<h6 class="card-title">${stockInfo.longName} (${stockInfo.symbol})</h6>
+										
+											<p class="">
+												<span class="h3">${currencySymbol}${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+												<small>${moment().format('YYYY-MM-DD')}</small>
+											</p>
+										</div>
+										
+										<span class="badge  ${recommendationColor}">${response.prediction}</span>
 									</div>
-								`; 
-
-								resultElem += $infoElem; 
+									
+								`;  
 							}
 
 							if(response.chart_html) {
-								resultElem += response.chart_html;
+								let $chartElem = `
+									<div class="card rounded-0 shadow mb-3">
+									${$infoElem}
+										<div class="card-body p-0">
+										${response.chart_html}
+										</div>
+									</div>
+								`; 
+								resultElem += $chartElem;
 							}
 
 							// Populate the stock data table

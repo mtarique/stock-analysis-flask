@@ -33,6 +33,14 @@
             height: 3rem;
         }
 
+		 table.dataTable {
+			border-collapse: collapse;
+		}
+
+		div.dt-buttons {
+			display: none;
+		}
+
 	</style>
 </head>
 <body>
@@ -144,20 +152,26 @@
 
 							if(stockData) {
 								let $historicalTable = `
-									<h3>Historical Data</h3>
-									<table id="stockData" class="table table-sm table-bordered- table-hover">
-										<thead class="table-light">
-											<tr>
-												<th class="text-center align-middle">Date</th>
-												<th class="text-center align-middle">Open</th>
-												<th class="text-center align-middle">High</th>
-												<th class="text-center align-middle">Low</th>
-												<th class="text-center align-middle">Close</th>
-												<th class="text-center align-middle">Volume</th>
-											</tr>
-										</thead>
-									<tbody>
-								`; 
+									<div class="card rounded-0 shadow">
+										<div class="card-header d-flex justify-content-between align-items-center bg-white border-bottom-0"> 
+											<h5 class="card-title">Historical Data</h5>
+											<button class="btn btn-sm btn-primary buttons-csv" id="customExportCSV">Download CSV</button>
+										</div>
+										<div class="card-body p-0">
+											<div class="table-responsive">
+												<table id="stockData" class="table table-sm table-bordered table-hover">
+													<thead class="table-light">
+														<tr>
+															<th class="text-center align-middle">Date</th>
+															<th class="text-center align-middle">Open</th>
+															<th class="text-center align-middle">High</th>
+															<th class="text-center align-middle">Low</th>
+															<th class="text-center align-middle">Close</th>
+															<th class="text-center align-middle">Volume</th>
+														</tr>
+													</thead>
+													<tbody>
+									`; 
 
 								stockData.forEach(function(row) {
 
@@ -173,20 +187,56 @@
 									`; 
 								});
 
-								$historicalTable += `</tbody></table>`; 
+								$historicalTable += `</tbody></table></div></div></div>`; 
 
 								resultElem += $historicalTable; 
 							}
 
 							$('#stockResult').html(resultElem);
 
-							$('#stockData').DataTable({
+							let dtHistoricalData = $('#stockData').DataTable({
 								paging: false,
     							scrollY: 400, 
 								order: [[0, 'desc']],
-								dom: 'Brti', // B for Buttons, f for search, r for processing, t for table, i for info, p for pagination
-								buttons: ['csv', 'excel'] // Export buttons: copy, CSV, Excel, PDF
+								scrollX: true, // Enables horizontal scrolling
+								fixedColumns: {
+									leftColumns: 1 // Number of columns to fix on the left side
+								}, 
+								dom: 'Brt', // B for Buttons, f for search, r for processing, t for table, i for info, p for pagination
+								buttons: [
+									{
+										extend: 'csvHtml5',
+										title: 'Data export',
+										exportOptions: {
+											columns: ':visible'
+										},
+										filename: 'Exported_Data',
+										customize: function(csv) {
+											return csv; // Optional: custom logic to modify CSV data
+										}
+									},
+									{
+										extend: 'excelHtml5',
+										title: 'Data export',
+										exportOptions: {
+											columns: ':visible'
+										},
+										filename: 'Exported_Data',
+										customize: function(xlsx) {
+											// Optional: custom logic to modify Excel data
+										}
+									}
+								]
 							}); 
+
+							// Bind custom button click events to the DataTable export functions
+							$('#customExportCSV').on('click', function() {
+								dtHistoricalData.button('.buttons-csv').trigger();
+							});
+
+							$('#customExportExcel').on('click', function() {
+								dtHistoricalData.button('.buttons-excel').trigger();
+							});
 						}
 					},
 					error: function(xhr, status, error) {

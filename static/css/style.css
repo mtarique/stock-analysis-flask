@@ -1,0 +1,50 @@
+.input-group .form-control:focus,
+.input-group .form-select:focus {
+    box-shadow: none !important;
+}
+
+/* Spinner container with background overlay */
+.spinner-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.1); /* Semi-transparent black background */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    display: flex;
+}
+
+/* Spinner styling */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+table.dataTable {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+/* Ensure the cards fill the height equally */
+.card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.card-body {
+    flex-grow: 1; /* Makes sure the body expands to take the available space */
+}
+
+/* Fix image height and ensure it covers the space */
+.card-img-top {
+    height: 200px; /* Set the desired fixed height for the image */
+    object-fit: cover; /* Ensures the image covers the area without distorting */
+    width: 100%; /* Ensures the image takes full width of the card */
+}
+
+div.dt-buttons {
+    display: none;
+}

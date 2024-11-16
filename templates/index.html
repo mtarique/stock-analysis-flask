@@ -33,9 +33,19 @@
             height: 3rem;
         }
 
-		 table.dataTable {
+		table.dataTable {
 			border-collapse: collapse;
+			width: 100%;
 		}
+/* 
+		table {
+			table-layout: fixed;
+			width: 100%;
+		} */
+
+		/* th {
+			width: 100px;
+		} */
 
 		div.dt-buttons {
 			display: none;
@@ -155,46 +165,27 @@
 								`;  
 							}
 
-							if(response.chart_html) {
-								let $chartElem = `
-									<div class="card rounded-0 shadow mb-3">
-									${$infoElem}
-										<div class="card-body p-0">
-										${response.chart_html}
-										</div>
-									</div>
-								`; 
-								resultElem += $chartElem;
-							}
-
 							// Populate the stock data table
 							var stockData = response.stock_data_table;
-
+							let $historicalTable = ``;
 							if(stockData) {
-								let $historicalTable = `
-									<div class="card rounded-0 shadow">
-										<div class="card-header d-flex justify-content-between align-items-center bg-white border-bottom-0"> 
-											<h5 class="card-title">Historical Data</h5>
-											<button class="btn btn-sm btn-primary buttons-csv" id="customExportCSV">Download CSV</button>
-										</div>
-										<div class="card-body p-0">
-											<div class="table-responsive">
-												<table id="stockData" class="table table-sm table-bordered table-hover">
-													<thead class="table-light">
-														<tr>
-															<th class="text-center align-middle">Date</th>
-															<th class="text-center align-middle">Open</th>
-															<th class="text-center align-middle">High</th>
-															<th class="text-center align-middle">Low</th>
-															<th class="text-center align-middle">Close</th>
-															<th class="text-center align-middle">Volume</th>
-														</tr>
-													</thead>
-													<tbody>
-									`; 
+								$historicalTable = `
+								<div class="table-responsive">
+									<table id="stockData" class="display table table-sm table-bordered table-hover">
+										<thead class="table-light">
+											<tr>
+												<th class="text-center align-middle">Date</th>
+												<th class="text-center align-middle">Open</th>
+												<th class="text-center align-middle">High</th>
+												<th class="text-center align-middle">Low</th>
+												<th class="text-center align-middle">Close</th>
+												<th class="text-center align-middle">Volume</th>
+											</tr>
+										</thead>
+										<tbody>
+								`; 
 
 								stockData.forEach(function(row) {
-
 									$historicalTable += `
 										<tr>
 											<td class="text-center align-middle" data-sort="${moment(row.Date).format('YYYY-MM-DD')}"> ${moment(row.Date).format('DD MMM YYYY')} </td>
@@ -207,10 +198,42 @@
 									`; 
 								});
 
-								$historicalTable += `</tbody></table></div></div></div>`; 
-
-								resultElem += $historicalTable; 
+								$historicalTable += `</tbody></table></div>`; 
 							}
+
+							if(response.chart_html) {
+								let $chartElem = `
+									<div class="card rounded-0 shadow mb-3">
+										${$infoElem}
+										<div class="card-body pt-0 pb-3 px-3">
+											<ul class="nav nav-underline" id="myTab" role="tablist">
+												<li class="nav-item" role="presentation">
+													<button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Overview</button>
+												</li>
+												<li class="nav-item" role="presentation">
+													<button class="nav-link" id="historical-data-tab" data-bs-toggle="tab" data-bs-target="#historical-data" type="button" role="tab" aria-controls="historical-data" aria-selected="false">Historical Data</button>
+												</li>
+											</ul>
+											<div class="tab-content" id="myTabContent">
+												<div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+													${response.chart_html}
+												</div>
+												<div class="tab-pane fade" id="historical-data" role="tabpanel" aria-labelledby="historical-data-tab">
+													<div class="d-flex justify-content-between align-items-center mb-3"> 
+														<h5 class="mb-0"></h5>
+														<button class="btn btn-sm btn-primary buttons-csv" id="customExportCSV">Download CSV</button>
+													</div
+													${$historicalTable}
+												</div>
+											</div>
+										
+										</div>
+									</div>
+								`; 
+								resultElem += $chartElem;
+							}
+
+							
 
 							$('#stockResult').html(resultElem);
 
@@ -248,6 +271,20 @@
 									}
 								]
 							}); 
+
+							$('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+								$('#stockData').DataTable().columns.adjust().draw();
+							});
+
+							// Attach the event listener for tab show
+							document.querySelectorAll('#myTab button[data-bs-toggle="tab"]').forEach((tab) => {
+								tab.addEventListener('shown.bs.tab', (event) => {
+									// let table = $('#yourTableId').DataTable();
+									if (dtHistoricalData) {
+										dtHistoricalData.columns.adjust().draw();
+									}
+								});
+							});
 
 							// Bind custom button click events to the DataTable export functions
 							$('#customExportCSV').on('click', function() {

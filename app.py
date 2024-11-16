@@ -91,7 +91,15 @@ def stock_analysis():
     fig.update_layout(title=f'{stock_symbol} Stock Price', xaxis_title='Date', yaxis_title='Price')
 
     # Convert the chart to HTML
-    chart_html = fig.to_html(full_html=False)
+    candle_stick_chart = fig.to_html(full_html=False)
+
+    # Create a line chart for closing prices
+    price_line_fig = go.Figure()
+    price_line_fig.add_trace(go.Scatter(x=stock_data.index, y=stock_data['Close'], mode='lines', name='Close Price', line=dict(color='green')))
+    price_line_fig.update_layout(title=f'{stock_symbol} Closing Prices', xaxis_title='Date', yaxis_title='Price')
+
+    # Convert the line chart for prices to HTML
+    price_line_chart = price_line_fig.to_html(full_html=False)
 
     # Pass stock data as a table
     stock_data_table = stock_data.reset_index().to_dict('records')
@@ -131,7 +139,7 @@ def stock_analysis():
     # Convert the moving average chart to HTML
     line_chart = ma_fig.to_html(full_html=False)
 
-    return jsonify({'chart_html': chart_html, 'line_chart': line_chart, 'stock_data_table': stock_data_table, 'stock_info': stock.info, 'stock_news': stock.news, 'close_datetime': close_datetime, 'price_change': price_change, 'price_change_pct': price_change_pct, 'prediction': recommendation})
+    return jsonify({'candle_stick_chart': candle_stick_chart, 'price_line_chart': price_line_chart, 'line_chart': line_chart, 'stock_data_table': stock_data_table, 'stock_info': stock.info, 'stock_news': stock.news, 'close_datetime': close_datetime, 'price_change': price_change, 'price_change_pct': price_change_pct, 'prediction': recommendation})
 
 if __name__ == '__main__':
     app.run(debug=True)

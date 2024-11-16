@@ -29,17 +29,17 @@ table.dataTable {
 }
 
 /* Ensure the cards fill the height equally */
-.card {
+.news-card {
     display: flex;
     flex-direction: column;
     height: 100%;
 }
-.card-body {
+.news-card-body {
     flex-grow: 1; /* Makes sure the body expands to take the available space */
 }
 
 /* Fix image height and ensure it covers the space */
-.card-img-top {
+.news-card-img-top {
     height: 200px; /* Set the desired fixed height for the image */
     object-fit: cover; /* Ensures the image covers the area without distorting */
     width: 100%; /* Ensures the image takes full width of the card */

@@ -108,12 +108,14 @@ $(document).ready(function() {
 
                         stockNews.forEach((article, index) => {
                             if(article.title) {
+                                // News article thumbnail
+                                let thumbnail = article.thumbnail?.resolutions[0]?.url ||  "/static/img/img-not-available.jpg";
                                 // Create a new Bootstrap 5 card
                                 $stockNewsElem += `
                                     <div class="col-md-3 mb-3">
-                                        <div class="card ">
-                                            <img src="${article.thumbnail.resolutions[0].url}" class="card-img-top" alt="Article Image">
-                                            <div class="card-body">
+                                        <div class="card news-card">
+                                            <img src="${thumbnail}" class="card-img-top news-card-img-top" alt="Article Image">
+                                            <div class="card-body news-card-body">
                                                 <h6 class="card-title">${article.title}</h6>
                                             </div>
                                             <div class="card-footer bg-white d-grid border-top-0">
@@ -145,9 +147,28 @@ $(document).ready(function() {
                                 </ul>
                                 <div class="tab-content" id="myTabContent">
                                     <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
-                                        ${response.chart_html || "Chart could not be generated"}
-                                        <br>
-                                        ${response.line_chart || "Line chart could not be generated"}
+                                        <ul class="nav justify-content-center" id="chartTab" role="tablist">
+                                            <li class="nav-item me-3" role="presentation">
+                                                <button class="nav-link- btn btn-sm btn-light active" id="chart-one-tab" data-bs-toggle="tab" data-bs-target="#chart-one" type="button" role="tab" aria-controls="chart-one" aria-selected="true">Closing Price Line Chart</button>
+                                            </li>
+                                            <li class="nav-item me-3" role="presentation">
+                                                <button class="nav-link- btn btn-sm btn-light" id="chart-two-tab" data-bs-toggle="tab" data-bs-target="#chart-two" type="button" role="tab" aria-controls="chart-two" aria-selected="false">Closing Price Candle Stick Chart</button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link- btn btn-sm btn-light" id="chart-three-tab" data-bs-toggle="tab" data-bs-target="#chart-three" type="button" role="tab" aria-controls="chart-three" aria-selected="false">Moving Averages Chart</button>
+                                            </li>
+                                        </ul>
+                                        <div class="tab-content" id="chartTabContent">
+                                            <div class="tab-pane fade show active" id="chart-one" role="tabpanel" aria-labelledby="chart-one-tab">
+                                                ${response.price_line_chart || "Price line chart could not be generated"}
+                                            </div>
+                                            <div class="tab-pane fade" id="chart-two" role="tabpanel" aria-labelledby="chart-two-tab">
+                                                ${response.candle_stick_chart || "Chart could not be generated"}
+                                            </div>
+                                            <div class="tab-pane fade" id="chart-three" role="tabpanel" aria-labelledby="chart-three-tab">
+                                                ${response.line_chart || "Line chart could not be generated"}
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="tab-pane fade" id="historical-data" role="tabpanel" aria-labelledby="historical-data-tab">
                                         <div class="d-flex justify-content-between align-items-center mb-3"> 
@@ -202,16 +223,18 @@ $(document).ready(function() {
                         ]
                     }); 
 
-                    $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
-                        $('#stockData').DataTable().columns.adjust().draw();
-                    });
-
                     // Attach the event listener for tab show to handle head column width
                     document.querySelectorAll('#myTab button[data-bs-toggle="tab"]').forEach((tab) => {
                         tab.addEventListener('shown.bs.tab', (event) => {
                             if (dtHistoricalData) {
                                 dtHistoricalData.columns.adjust().draw();
                             }
+                        });
+                    });
+
+                    document.querySelectorAll('#chartTab button[data-bs-toggle="tab"]').forEach(tab => {
+                        tab.addEventListener('shown.bs.tab', function () {
+                            window.dispatchEvent(new Event('resize')); // Trigger resize to fix reflow issues
                         });
                     });
 

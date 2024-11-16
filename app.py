@@ -119,7 +119,19 @@ def stock_analysis():
     # Calculate the price change percentage
     price_change_pct = ((price_change) / previous_close) * 100
 
-    return jsonify({'chart_html': chart_html, 'stock_data_table': stock_data_table, 'stock_info': stock.info, 'stock_news': stock.news, 'close_datetime': close_datetime, 'price_change': price_change, 'price_change_pct': price_change_pct, 'prediction': recommendation})
+    # Create a moving average chart (50-day and 200-day) - KEEP THIS CODE AFTER ALL ABOVE CODE BECAUSE STOCK_DATA IS GETTING MODIFIED HERE
+    stock_data['50_MA'] = stock_data['Close'].rolling(window=50).mean()
+    stock_data['200_MA'] = stock_data['Close'].rolling(window=200).mean()
+
+    ma_fig = go.Figure()
+    ma_fig.add_trace(go.Scatter(x=stock_data.index, y=stock_data['50_MA'], mode='lines', name='50-Day MA', line=dict(color='blue')))
+    ma_fig.add_trace(go.Scatter(x=stock_data.index, y=stock_data['200_MA'], mode='lines', name='200-Day MA', line=dict(color='red')))
+    ma_fig.update_layout(title=f'{stock_symbol} Moving Averages (50 & 200-Day)', xaxis_title='Date', yaxis_title='Price')
+
+    # Convert the moving average chart to HTML
+    line_chart = ma_fig.to_html(full_html=False)
+
+    return jsonify({'chart_html': chart_html, 'line_chart': line_chart, 'stock_data_table': stock_data_table, 'stock_info': stock.info, 'stock_news': stock.news, 'close_datetime': close_datetime, 'price_change': price_change, 'price_change_pct': price_change_pct, 'prediction': recommendation})
 
 if __name__ == '__main__':
     app.run(debug=True)

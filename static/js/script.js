@@ -146,6 +146,8 @@ $(document).ready(function() {
                                 <div class="tab-content" id="myTabContent">
                                     <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
                                         ${response.chart_html || "Chart could not be generated"}
+                                        <br>
+                                        ${response.line_chart || "Line chart could not be generated"}
                                     </div>
                                     <div class="tab-pane fade" id="historical-data" role="tabpanel" aria-labelledby="historical-data-tab">
                                         <div class="d-flex justify-content-between align-items-center mb-3"> 

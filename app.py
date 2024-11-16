@@ -119,7 +119,7 @@ def stock_analysis():
     # Calculate the price change percentage
     price_change_pct = ((price_change) / previous_close) * 100
 
-    return jsonify({'chart_html': chart_html, 'stock_data_table': stock_data_table, 'stock_info': stock.info, 'close_datetime': close_datetime, 'price_change': price_change, 'price_change_pct': price_change_pct, 'prediction': recommendation})
+    return jsonify({'chart_html': chart_html, 'stock_data_table': stock_data_table, 'stock_info': stock.info, 'stock_news': stock.news, 'close_datetime': close_datetime, 'price_change': price_change, 'price_change_pct': price_change_pct, 'prediction': recommendation})
 
 if __name__ == '__main__':
     app.run(debug=True)

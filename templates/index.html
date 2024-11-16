@@ -37,15 +37,23 @@
 			border-collapse: collapse;
 			width: 100%;
 		}
-/* 
-		table {
-			table-layout: fixed;
-			width: 100%;
-		} */
 
-		/* th {
-			width: 100px;
-		} */
+		/* Ensure the cards fill the height equally */
+        .card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .card-body {
+            flex-grow: 1; /* Makes sure the body expands to take the available space */
+        }
+
+		/* Fix image height and ensure it covers the space */
+		.card-img-top {
+			height: 200px; /* Set the desired fixed height for the image */
+			object-fit: cover; /* Ensures the image covers the area without distorting */
+			width: 100%; /* Ensures the image takes full width of the card */
+		}
 
 		div.dt-buttons {
 			display: none;
@@ -200,38 +208,68 @@
 								$historicalTable += `</tbody></table></div>`; 
 							}
 
-							if(response.chart_html) {
-								resultElem += `
-									<div class="card rounded-0 shadow mb-3">
-										${$infoElem}
-										<div class="card-body pt-0 pb-3 px-3">
-											<ul class="nav nav-underline" id="myTab" role="tablist">
-												<li class="nav-item" role="presentation">
-													<button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Overview</button>
-												</li>
-												<li class="nav-item" role="presentation">
-													<button class="nav-link" id="historical-data-tab" data-bs-toggle="tab" data-bs-target="#historical-data" type="button" role="tab" aria-controls="historical-data" aria-selected="false">Historical Data</button>
-												</li>
-											</ul>
-											<div class="tab-content" id="myTabContent">
-												<div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
-													${response.chart_html}
-												</div>
-												<div class="tab-pane fade" id="historical-data" role="tabpanel" aria-labelledby="historical-data-tab">
-													<div class="d-flex justify-content-between align-items-center mb-3"> 
-														<h5 class="mb-0"></h5>
-														<button class="btn btn-sm btn-primary buttons-csv" id="customExportCSV">Download CSV</button>
-													</div
-													${$historicalTable}
+							let $stockNewsElem = `<div class="row gx-4 mt-3">`; 
+							
+							if(response.stock_news) {
+								const stockNews = response.stock_news;
+
+								stockNews.forEach((article, index) => {
+									if(article.title) {
+										// Create a new Bootstrap 5 card
+										$stockNewsElem += `
+											<div class="col-md-3 mb-3">
+												<div class="card ">
+													<img src="${article.thumbnail.resolutions[0].url}" class="card-img-top" alt="Article Image">
+													<div class="card-body">
+														<h6 class="card-title">${article.title}</h6>
+													</div>
+													<div class="card-footer bg-white d-grid border-top-0">
+														<a href="${article.link}" class="btn btn-primary btn-sm" target="_blank">Read More...</a>
+													</div>
 												</div>
 											</div>
-										
-										</div>
-									</div>
-								`; 
-								// resultElem += $chartElem;
+										`;
+									}
+								}) 
 							}
 
+							$stockNewsElem += `</div>`;
+
+							resultElem += `
+								<div class="card rounded-0 shadow mb-3">
+									${$infoElem}
+									<div class="card-body pt-0 pb-3 px-3">
+										<ul class="nav nav-underline" id="myTab" role="tablist">
+											<li class="nav-item" role="presentation">
+												<button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Overview</button>
+											</li>
+											<li class="nav-item" role="presentation">
+												<button class="nav-link" id="historical-data-tab" data-bs-toggle="tab" data-bs-target="#historical-data" type="button" role="tab" aria-controls="historical-data" aria-selected="false">Historical Data</button>
+											</li>
+											<li class="nav-item" role="presentation">
+												<button class="nav-link" id="news-tab" data-bs-toggle="tab" data-bs-target="#news" type="button" role="tab" aria-controls="news" aria-selected="false">News</button>
+											</li>
+										</ul>
+										<div class="tab-content" id="myTabContent">
+											<div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+												${response.chart_html || "Chart could not be generated"}
+											</div>
+											<div class="tab-pane fade" id="historical-data" role="tabpanel" aria-labelledby="historical-data-tab">
+												<div class="d-flex justify-content-between align-items-center mb-3"> 
+													<h5 class="mb-0"></h5>
+													<button class="btn btn-sm btn-primary buttons-csv" id="customExportCSV">Download CSV</button>
+												</div
+												${$historicalTable}
+											</div>
+											<div class="tab-pane fade" id="news" role="tabpanel" aria-labelledby="news-tab">
+												${$stockNewsElem}
+											</div>
+										</div>
+									
+									</div>
+								</div>
+							`; 
+							
 							$('#stockResult').html(resultElem);
 
 							let dtHistoricalData = $('#stockData').DataTable({
@@ -273,10 +311,9 @@
 								$('#stockData').DataTable().columns.adjust().draw();
 							});
 
-							// Attach the event listener for tab show
+							// Attach the event listener for tab show to handle head column width
 							document.querySelectorAll('#myTab button[data-bs-toggle="tab"]').forEach((tab) => {
 								tab.addEventListener('shown.bs.tab', (event) => {
-									// let table = $('#yourTableId').DataTable();
 									if (dtHistoricalData) {
 										dtHistoricalData.columns.adjust().draw();
 									}

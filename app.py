@@ -142,4 +142,5 @@ def stock_analysis():
     return jsonify({'candle_stick_chart': candle_stick_chart, 'price_line_chart': price_line_chart, 'line_chart': line_chart, 'stock_data_table': stock_data_table, 'stock_info': stock.info, 'stock_news': stock.news, 'close_datetime': close_datetime, 'price_change': price_change, 'price_change_pct': price_change_pct, 'prediction': recommendation})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)
